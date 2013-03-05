@@ -163,7 +163,7 @@
             <DriverSelection>4099</DriverSelection>
           </Flash1>
           <Flash2>BIN\MONADI.DLL</Flash2>
-          <Flash3></Flash3>
+          <Flash3>"" ()</Flash3>
           <Flash4></Flash4>
         </Utilities>
         <Target51>

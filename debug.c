@@ -19,7 +19,11 @@
 
 extern struct pt pt_proto;
 extern volatile unsigned long PHASE_1_RESULT,PHASE_2_RESULT;
+extern volatile unsigned long PHASE_1_RESULT_LAST,PHASE_2_RESULT_LAST;	//предыдущий результат
 volatile struct pt pt_out;
+
+volatile int angle=0, last_angle=0;
+
 PT_THREAD(OutProcess(struct pt *pt));
 
 //-----------------------------------------
@@ -81,9 +85,11 @@ PT_THREAD(OutProcess(struct pt *pt))
 
   while(1) 
   {
-  	 PT_DELAY(pt, 20);
-
-	 channels[0].channel_data=Get_Angle(PHASE_1_RESULT,PHASE_2_RESULT);
+  	 PT_DELAY(pt, 1);
+	 last_angle=angle;
+	 angle=Get_Angle(PHASE_1_RESULT,PHASE_2_RESULT);
+	 //channels[0].channel_data+=Get_Delta_Angle(PHASE_1_RESULT,PHASE_2_RESULT,PHASE_1_RESULT_LAST,PHASE_2_RESULT_LAST);//Get_Angle(PHASE_1_RESULT,PHASE_2_RESULT);
+  	channels[0].channel_data+=(angle-last_angle);//Get_Angle(PHASE_1_RESULT,PHASE_2_RESULT);
   }
   PT_END(pt);
  }

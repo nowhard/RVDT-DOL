@@ -9,10 +9,9 @@ sbit PHASE_2=P3^5;
 sbit PIN_1=P3^2;
 sbit PIN_2=P3^3;
 
-#define ADC_MID 2048
-#define QUADRANT_WEIGHT	128
 
-#define SHR	3
+
+volatile unsigned char ANGLE_HANDLING_FLAG=0;//обработать угол
 //-------------------------------------------------------- debug
 // long volatile idata counter_32; //счетчик дола
 
@@ -121,6 +120,108 @@ int Get_Angle(unsigned long PH_1,unsigned long PH_2)
 		else
 		{
 			return 	(cos_angle[((ADC_MID-PH_2)>>1)&0x3FF]>>SHR)+3*QUADRANT_WEIGHT;
+		}
+	}
+	//------------------------------------------------
+}
+
+//----------------------------------------------------------------------------
+int Get_Delta_Angle(unsigned long PH_1,unsigned long PH_2,unsigned long PH_1_LAST,unsigned long PH_2_LAST)
+{
+	long temp_phase_1=0,temp_phase_2=0,temp_phase_1_last=0,temp_phase_2_last=0;
+
+
+
+	PH_1=NORM1(PH_1);
+	PH_2=NORM2(PH_2);
+
+
+
+	PH_1_LAST=NORM1(PH_1_LAST);
+	PH_2_LAST=NORM2(PH_2_LAST);
+
+//	if(PH_1_LAST>=2040 &&  PH_1_LAST<2060)
+//	{
+//		PH_1_LAST=2048;
+//	}
+//
+//	if(PH_2_LAST>=4086 &&  PH_2_LAST<4106)
+//	{
+//		PH_2_LAST=4096;
+//	}
+
+   	temp_phase_1=(long)PH_1-ADC_MID;
+	temp_phase_2=(long)PH_2-ADC_MID;
+
+	temp_phase_1_last=(long)PH_1_LAST-ADC_MID;
+	temp_phase_2_last=(long)PH_2_LAST-ADC_MID;
+//-------------синус и косинус разности двух углов-----------
+
+	PH_1=((temp_phase_2*temp_phase_1_last-temp_phase_1*temp_phase_2_last)>>11)+ADC_MID;
+	PH_2=((temp_phase_2*temp_phase_2_last+temp_phase_1*temp_phase_1_last)>>11)+ADC_MID;
+
+	if(PH_1>=2040 &&  PH_1<2060)
+	{
+		PH_1=2048;
+	}
+
+	if(PH_2>=4060 &&  PH_2<4106)
+	{
+		PH_2=4096;
+	}
+	
+	channels[1].channel_data=PH_1;
+	channels[2].channel_data=PH_2;	
+//-----------------------------------------------------------
+	temp_phase_1=(long)PH_1-ADC_MID;
+	temp_phase_2=(long)PH_2-ADC_MID;
+	ANGLE_HANDLING_FLAG=0;//обработали
+   //------------------------------------------------
+	if(temp_phase_1>=0 && temp_phase_2>=0)//I quadrant
+	{
+		if(temp_phase_1<temp_phase_2)
+		{
+			return 	sin_angle[((PH_1-ADC_MID)>>1)&0x3FF]>>SHR;
+		}
+		else
+		{
+			return 	cos_angle[((PH_2-ADC_MID)>>1)&0x3FF]>>SHR;
+		}
+	}
+	//------------------------------------------------
+	if(temp_phase_1>=0 && temp_phase_2<0)//II quadrant
+	{
+		if((temp_phase_1+temp_phase_2)>=0)
+		{
+			return 	(sin_angle[((ADC_MID-PH_2)>>1)&0x3FF]>>SHR)+QUADRANT_WEIGHT;
+		}
+		else
+		{
+			return 	(cos_angle[((PH_1-ADC_MID)>>1)&0x3FF]>>SHR)+QUADRANT_WEIGHT;
+		}	
+	}
+   //------------------------------------------------
+	if(temp_phase_1<0 && temp_phase_2<0) //III quadrant
+	{
+		if(temp_phase_1>=temp_phase_2)
+		{
+			return 	(sin_angle[((ADC_MID-PH_1)>>1)&0x3FF]>>SHR)-QUADRANT_WEIGHT*2;
+		}
+		else
+		{
+			return 	(cos_angle[((ADC_MID-PH_2)>>1)&0x3FF]>>SHR)-QUADRANT_WEIGHT*2;
+		}
+	}
+   //------------------------------------------------
+	if(temp_phase_1<0 && temp_phase_2>=0) //IV quadrant
+	{
+		if((temp_phase_1-temp_phase_2)>=0)
+		{
+			return 	(sin_angle[((PH_1-ADC_MID)>>1)&0x3FF]>>SHR)-QUADRANT_WEIGHT;
+		}
+		else
+		{
+			return 	(cos_angle[((ADC_MID-PH_2)>>1)&0x3FF]>>SHR)-QUADRANT_WEIGHT;
 		}
 	}
 	//------------------------------------------------

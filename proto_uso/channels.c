@@ -37,7 +37,7 @@ void ChannelsInit(void) //using 0//инициализация структуры каналов
 		channels[2].channel_data_calibrate=0;
 		channels[2].calibrate.cal.calibrate=0;
 	}
-//	channels[11].channel_data=0x80008000;
+	channels[0].channel_data=0x80008000;
 	return;
 }
 //-----------------------------------
