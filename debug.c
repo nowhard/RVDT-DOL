@@ -67,7 +67,7 @@ void main(void) //using 0
 	Timer2_Initialize();
 
 
-//	WDT_Init(WDT_2000);//включить сторожевой таймер
+	WDT_Init(WDT_2000);//включить сторожевой таймер
 
 
 //	RestoreCalibrate();
@@ -107,13 +107,12 @@ PT_THREAD(OutProcess(struct pt *pt))
   while(1) 
   {
   	 PT_DELAY(pt, 1);
-	 //last_angle=angle;
-	 angle=Get_Angle(PHASE_1_RESULT,PHASE_2_RESULT);//+turn_counter;
-	 
-    channels[0].channel_data=angle+turn_counter+0x80008000;//(angle-last_angle);//Get_Angle(PHASE_1_RESULT,PHASE_2_RESULT);
 
-   channels[3].channel_data=turn_counter;
-   channels[4].channel_data=ADC_MID_2;
+//	angle=arctan((long)PHASE_1_RESULT-ADC_MID_1,(long)PHASE_2_RESULT-ADC_MID_2);//Get_Angle(PHASE_1_RESULT,PHASE_2_RESULT);//+turn_counter;
+	 
+    channels[0].channel_data=arctan((long)PHASE_1_RESULT-ADC_MID_1,(long)PHASE_2_RESULT-ADC_MID_2)+turn_counter+0x80008000;//(angle-last_angle);//Get_Angle(PHASE_1_RESULT,PHASE_2_RESULT);
+
+  	WDT_Clear();
 
   }
   PT_END(pt);

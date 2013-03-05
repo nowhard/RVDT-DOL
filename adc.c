@@ -1,8 +1,7 @@
 #include "adc.h"
 #include "dol.h"
 
-sbit PIN_1=P3^2;
-sbit PIN_2=P3^3;
+
 sbit PHASE_1=P3^4;
 sbit PHASE_2=P3^5;
 
@@ -12,15 +11,15 @@ sbit PHASE_2=P3^5;
 volatile unsigned char adc_mid_counter=MID_NUM;//счетчик буфера усреднения
 volatile unsigned long PHASE_1_VAL=0,PHASE_2_VAL=0;
 volatile unsigned long PHASE_1_RESULT=0,PHASE_2_RESULT=0;
-volatile unsigned long PHASE_1_RESULT_LAST=0,PHASE_2_RESULT_LAST=0;	//предыдущий результат
+//volatile unsigned long PHASE_1_RESULT_LAST=0,PHASE_2_RESULT_LAST=0;	//предыдущий результат
 volatile long turn_counter=0;
 
-//volatile unsigned char MID_PHASE_1=0,MID_PHASE_2=0;
+
 
 volatile unsigned char sector_1=0, sector_4=0;//флаги секторов, по которым определяется прыжок
 extern volatile unsigned int ADC_MID_1,ADC_MID_2;
 
-extern volatile unsigned char ANGLE_HANDLING_FLAG;//обработать угол
+//extern volatile unsigned char ANGLE_HANDLING_FLAG;//обработать угол
 #pragma OT(6,Speed)
 //-------------------------------------------
 void ADC_Initialize() //using 0
@@ -35,25 +34,15 @@ void ADC_ISR(void) interrupt 6 //using 1
 {
 	 if(CS0==0)
 	 {
-//		PIN_1=1;
 		PHASE_1_VAL+=(((ADCDATAH&0x0F)<<8)|ADCDATAL);//получим результат
-//		PIN_1=0;
 	 }
 	 else
 	 {
-//		PIN_2=1;
 		PHASE_2_VAL+=(((ADCDATAH&0x0F)<<8)|ADCDATAL);//получим результат
 	 	adc_mid_counter--;
-//		PIN_2=0;
 	 }
-//	if(PHASE_1==1)
-//	{
-	    CS0^=1;		
-//	}
-//	else
-//	{
-		//CS0=0;	
-//	}
+
+	 CS0^=1;		
 
 
 	 if(adc_mid_counter==0)
@@ -71,22 +60,20 @@ void ADC_ISR(void) interrupt 6 //using 1
 				
 				if(sector_4==1)
 				{
-					//channels[0].channel_data+=1024;
 					turn_counter+=1024;
 				}
-				PIN_1=sector_1=1;
-				PIN_2=sector_4=0;
+				sector_1=1;
+				sector_4=0;
 			}
 			else								//4 сектор
 			{
 				
 				if(sector_1==1)
 				{
-					//channels[0].channel_data-=1024;
 					turn_counter-=1024;
 				}
-				PIN_2=sector_4=1;
-				PIN_1=sector_1=0;
+				sector_4=1;
+				sector_1=0;
 			}
 		}
 		else
@@ -94,10 +81,7 @@ void ADC_ISR(void) interrupt 6 //using 1
 			sector_1=0;	
 			sector_4=0;	
 		}
-		//channels[0].channel_data=PHASE_1_VAL>>6;
-		PHASE_1_VAL=PHASE_2_VAL=0;
-
-		
+		PHASE_1_VAL=PHASE_2_VAL=0;	
 	 }
 }
 //--------------------------------------------------
