@@ -3,7 +3,7 @@
 #include "eeprom/eeprom.h"
 #include "preferences.h"
 //---------------------------------------
-#define CHANNEL_NUMBER	3//количество каналов
+#define CHANNEL_NUMBER	5//количество каналов
 //---------------------------------------
 struct Channel
 {

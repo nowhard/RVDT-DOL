@@ -9,6 +9,7 @@ sbit PHASE_2=P3^5;
 sbit PIN_1=P3^2;
 sbit PIN_2=P3^3;
 
+volatile unsigned int ADC_MID_1=0,ADC_MID_2=0;
 
 
 volatile unsigned char ANGLE_HANDLING_FLAG=0;//обработать угол
@@ -54,223 +55,63 @@ void _TR2_ (void) interrupt 5
 //---------------------------------------------------------
 int Get_Angle(unsigned long PH_1,unsigned long PH_2)
 {
-	int temp_phase_1=0,temp_phase_2=0;
-
 	channels[1].channel_data=PH_1;
 	channels[2].channel_data=PH_2;
+	return arctan((long)PH_1-ADC_MID_1,(long)PH_2-ADC_MID_2);
 
-	PH_1=NORM1(PH_1)&0xFFF;
-	PH_2=NORM2(PH_2)&0xFFF;
-
-
-	
-	temp_phase_1=(long)PH_1-ADC_MID;
-	temp_phase_2=(long)PH_2-ADC_MID;
-   //------------------------------------------------
-	if(temp_phase_1>=0 && temp_phase_2>=0)//I quadrant
-	{
-		if(temp_phase_1<temp_phase_2)
-		{
-			return 	sin_angle[((PH_1-ADC_MID)>>1)&0x3FF]>>SHR;
-		}
-		else
-		{
-			return 	cos_angle[((PH_2-ADC_MID)>>1)&0x3FF]>>SHR;
-		}
-	}
-	//------------------------------------------------
-	if(temp_phase_1>=0 && temp_phase_2<0)//II quadrant
-	{
-		if((temp_phase_1+temp_phase_2)>=0)
-		{
-			return 	(sin_angle[((ADC_MID-PH_2)>>1)&0x3FF]>>SHR)+QUADRANT_WEIGHT;
-		}
-		else
-		{
-			return 	(cos_angle[((PH_1-ADC_MID)>>1)&0x3FF]>>SHR)+QUADRANT_WEIGHT;
-		}	
-	}
-   //------------------------------------------------
-	if(temp_phase_1<0 && temp_phase_2<0) //III quadrant
-	{
-		if(temp_phase_1>=temp_phase_2)
-		{
-			return 	(sin_angle[((ADC_MID-PH_1)>>1)&0x3FF]>>SHR)+QUADRANT_WEIGHT*2;
-		}
-		else
-		{
-			return 	(cos_angle[((ADC_MID-PH_2)>>1)&0x3FF]>>SHR)+QUADRANT_WEIGHT*2;
-		}
-	}
-   //------------------------------------------------
-	if(temp_phase_1<0 && temp_phase_2>=0) //IV quadrant
-	{
-		if((temp_phase_1-temp_phase_2)>=0)
-		{
-			return 	(sin_angle[((PH_1-ADC_MID)>>1)&0x3FF]>>SHR)+3*QUADRANT_WEIGHT;
-		}
-		else
-		{
-			return 	(cos_angle[((ADC_MID-PH_2)>>1)&0x3FF]>>SHR)+3*QUADRANT_WEIGHT;
-		}
-	}
-	//------------------------------------------------
-
-
-//	//------------------------------------------------
-//	if(PH_1>=ADC_MID)
-//	{
-//		if(PH_2>=ADC_MID)//I quadrant
-//		{
-//			if(PH_1<PH_2)
-//			{
-//				return 	sin_angle[((PH_1-ADC_MID)>>1)&0x3FF]>>SHR;
-//			}
-//			else
-//			{
-//				return 	cos_angle[((PH_2-ADC_MID)>>1)&0x3FF]>>SHR;
-//			}
-//		}
-//		//------------------------------------------------
-//		else//II quadrant
-//		{
-//			if((PH_1+PH_2)>=(ADC_MID<<1))
-//			{
-//				return 	(sin_angle[((ADC_MID-PH_2)>>1)&0x3FF]>>SHR)+QUADRANT_WEIGHT;
-//			}
-//			else
-//			{
-//				return 	(cos_angle[((PH_1-ADC_MID)>>1)&0x3FF]>>SHR)+QUADRANT_WEIGHT;
-//			}	
-//		}
-//	}
-//	else
-//	{
-//	   //------------------------------------------------
-//		if(PH_2<ADC_MID) //III quadrant
-//		{
-//			if(PH_1>=PH_2)
-//			{
-//				return 	(sin_angle[((ADC_MID-PH_1)>>1)&0x3FF]>>SHR)+QUADRANT_WEIGHT*2;
-//			}
-//			else
-//			{
-//				return 	(cos_angle[((ADC_MID-PH_2)>>1)&0x3FF]>>SHR)+QUADRANT_WEIGHT*2;
-//			}
-//		}
-//	   //------------------------------------------------
-//		else //IV quadrant
-//		{
-//			if((PH_1+PH_2)>(ADC_MID<<1))
-//			{
-//				return 	(sin_angle[((PH_1-ADC_MID)>>1)&0x3FF]>>SHR)+3*QUADRANT_WEIGHT;
-//			}
-//			else
-//			{
-//				return 	(cos_angle[((ADC_MID-PH_2)>>1)&0x3FF]>>SHR)+3*QUADRANT_WEIGHT;
-//			}
-//		}
-//	}
 }
 
 //----------------------------------------------------------------------------
-//int Get_Delta_Angle(unsigned long PH_1,unsigned long PH_2,unsigned long PH_1_LAST,unsigned long PH_2_LAST)
-//{
-//	long temp_phase_1=0,temp_phase_2=0,temp_phase_1_last=0,temp_phase_2_last=0;
-//
-//
-//
-//	PH_1=NORM1(PH_1);
-//	PH_2=NORM2(PH_2);
-//
-//
-//
-//	PH_1_LAST=NORM1(PH_1_LAST);
-//	PH_2_LAST=NORM2(PH_2_LAST);
-//
-////	if(PH_1_LAST>=2040 &&  PH_1_LAST<2060)
-////	{
-////		PH_1_LAST=2048;
-////	}
-////
-////	if(PH_2_LAST>=4086 &&  PH_2_LAST<4106)
-////	{
-////		PH_2_LAST=4096;
-////	}
-//
-//   	temp_phase_1=(long)PH_1-ADC_MID;
-//	temp_phase_2=(long)PH_2-ADC_MID;
-//
-//	temp_phase_1_last=(long)PH_1_LAST-ADC_MID;
-//	temp_phase_2_last=(long)PH_2_LAST-ADC_MID;
-////-------------синус и косинус разности двух углов-----------
-//
-//	PH_1=((temp_phase_2*temp_phase_1_last-temp_phase_1*temp_phase_2_last)>>11)+ADC_MID;
-//	PH_2=((temp_phase_2*temp_phase_2_last+temp_phase_1*temp_phase_1_last)>>11)+ADC_MID;
-//
-//	if(PH_1>=2040 &&  PH_1<2060)
-//	{
-//		PH_1=2048;
-//	}
-//
-//	if(PH_2>=4060 &&  PH_2<4106)
-//	{
-//		PH_2=4096;
-//	}
-//	
-//	channels[1].channel_data=PH_1;
-//	channels[2].channel_data=PH_2;	
-////-----------------------------------------------------------
-//	temp_phase_1=(long)PH_1-ADC_MID;
-//	temp_phase_2=(long)PH_2-ADC_MID;
-//	ANGLE_HANDLING_FLAG=0;//обработали
-//   //------------------------------------------------
-//	if(temp_phase_1>=0 && temp_phase_2>=0)//I quadrant
-//	{
-//		if(temp_phase_1<temp_phase_2)
-//		{
-//			return 	sin_angle[((PH_1-ADC_MID)>>1)&0x3FF]>>SHR;
-//		}
-//		else
-//		{
-//			return 	cos_angle[((PH_2-ADC_MID)>>1)&0x3FF]>>SHR;
-//		}
-//	}
-//	//------------------------------------------------
-//	if(temp_phase_1>=0 && temp_phase_2<0)//II quadrant
-//	{
-//		if((temp_phase_1+temp_phase_2)>=0)
-//		{
-//			return 	(sin_angle[((ADC_MID-PH_2)>>1)&0x3FF]>>SHR)+QUADRANT_WEIGHT;
-//		}
-//		else
-//		{
-//			return 	(cos_angle[((PH_1-ADC_MID)>>1)&0x3FF]>>SHR)+QUADRANT_WEIGHT;
-//		}	
-//	}
-//   //------------------------------------------------
-//	if(temp_phase_1<0 && temp_phase_2<0) //III quadrant
-//	{
-//		if(temp_phase_1>=temp_phase_2)
-//		{
-//			return 	(sin_angle[((ADC_MID-PH_1)>>1)&0x3FF]>>SHR)-QUADRANT_WEIGHT*2;
-//		}
-//		else
-//		{
-//			return 	(cos_angle[((ADC_MID-PH_2)>>1)&0x3FF]>>SHR)-QUADRANT_WEIGHT*2;
-//		}
-//	}
-//   //------------------------------------------------
-//	if(temp_phase_1<0 && temp_phase_2>=0) //IV quadrant
-//	{
-//		if((temp_phase_1-temp_phase_2)>=0)
-//		{
-//			return 	(sin_angle[((PH_1-ADC_MID)>>1)&0x3FF]>>SHR)-QUADRANT_WEIGHT;
-//		}
-//		else
-//		{
-//			return 	(cos_angle[((ADC_MID-PH_2)>>1)&0x3FF]>>SHR)-QUADRANT_WEIGHT;
-//		}
-//	}
-//	//------------------------------------------------
-//}
+int arctan(long V1, long V2) {
+  //Handle the quadrants explicitly
+  if (V1 < 0)
+  {
+    if (V2 < 0)
+    {
+      if (V1 < V2) // 180-225
+      {
+        return 512 + (arctan256[256 * V2 / V1]);
+      }
+      else // 225-270
+      {
+        return 768-(arctan256[256 * V1 / V2]);
+      }
+    }
+    else // V2 => 0	   //errors
+    {
+      if (-V1 < V2) // 90-135
+      {
+        return 256 + (arctan256[256 * (-V1) / V2]);
+      }
+      else // 135-180
+      {
+        return 512 - (arctan256[256 * V2 / (-V1)]);
+      }
+    }
+  }
+  else // V1 => 0
+  {
+    if (V2 < 0)		 //errors
+    {
+      if (V1 < -V2) // 270-315
+      {
+        return 768 + (arctan256[256 * V1 / (-V2)]);
+      }
+      else // 315-360
+      {
+         return 1024 - (arctan256[256 * (-V2) / V1]);
+      }      
+    }
+    else // V2 => 0
+    {
+      if (V1 < V2) // 45-90
+      {
+        return 256 - (arctan256[256 * V1 / V2]);
+      }
+      else // 0-45
+      {  
+        return (arctan256[256 * V2 / V1]);
+      }      
+    }  
+  }
+}

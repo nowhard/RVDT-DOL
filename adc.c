@@ -9,13 +9,16 @@ sbit PHASE_2=P3^5;
 
 //-------------------global variables-----------------------------------
 //volatile struct ADC_Channels xdata adc_channels[ADC_CHANNELS_NUM];
-volatile unsigned char adc_mid_counter;//счетчик буфера усреднения
+volatile unsigned char adc_mid_counter=MID_NUM;//счетчик буфера усреднения
 volatile unsigned long PHASE_1_VAL=0,PHASE_2_VAL=0;
 volatile unsigned long PHASE_1_RESULT=0,PHASE_2_RESULT=0;
 volatile unsigned long PHASE_1_RESULT_LAST=0,PHASE_2_RESULT_LAST=0;	//предыдущий результат
+volatile long turn_counter=0;
+
 //volatile unsigned char MID_PHASE_1=0,MID_PHASE_2=0;
 
 volatile unsigned char sector_1=0, sector_4=0;//флаги секторов, по которым определяется прыжок
+extern volatile unsigned int ADC_MID_1,ADC_MID_2;
 
 extern volatile unsigned char ANGLE_HANDLING_FLAG;//обработать угол
 #pragma OT(6,Speed)
@@ -58,17 +61,18 @@ void ADC_ISR(void) interrupt 6 //using 1
 	 	adc_mid_counter=MID_NUM;
 
 
-	    PHASE_1_RESULT=PHASE_1_VAL>>4;
-		PHASE_2_RESULT=PHASE_2_VAL>>4;	
+	    PHASE_1_RESULT=PHASE_1_VAL>>6;
+		PHASE_2_RESULT=PHASE_2_VAL>>6;	
 
-		if(PHASE_2_RESULT>=ADC_MID)
+		if(((long)PHASE_1_RESULT-ADC_MID_1)>0)
 		{
-			if(PHASE_1_RESULT>=ADC_MID)//1 сектор
+			if(((long)PHASE_2_RESULT-ADC_MID_2)>=0)//1 сектор
 			{
 				
 				if(sector_4==1)
 				{
-					channels[0].channel_data+=512;
+					//channels[0].channel_data+=1024;
+					turn_counter+=1024;
 				}
 				PIN_1=sector_1=1;
 				PIN_2=sector_4=0;
@@ -78,7 +82,8 @@ void ADC_ISR(void) interrupt 6 //using 1
 				
 				if(sector_1==1)
 				{
-					channels[0].channel_data-=512;
+					//channels[0].channel_data-=1024;
+					turn_counter-=1024;
 				}
 				PIN_2=sector_4=1;
 				PIN_1=sector_1=0;
@@ -86,10 +91,8 @@ void ADC_ISR(void) interrupt 6 //using 1
 		}
 		else
 		{
-			//PIN_1=1;
 			sector_1=0;	
-			sector_4=0;
-			//PIN_1=0;	
+			sector_4=0;	
 		}
 		//channels[0].channel_data=PHASE_1_VAL>>6;
 		PHASE_1_VAL=PHASE_2_VAL=0;

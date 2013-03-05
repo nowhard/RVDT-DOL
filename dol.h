@@ -11,7 +11,7 @@
 #define MIN2	465
 #define MAX2	3547
 
-#define ADC_MID 2006
+#define ADC_MID 2010
 #define QUADRANT_WEIGHT	128
 
 #define SHR	3
@@ -25,6 +25,7 @@ unsigned char Sec_Task(void);//секундная задача для определения нулевой частоты
 void INT0_ISR(void);//обработчик внешнего прерывания 0
 int Get_Angle(unsigned long PH_1,unsigned long PH_2);
 int Get_Delta_Angle(unsigned long PH_1,unsigned long PH_2,unsigned long PH_1_LAST,unsigned long PH_2_LAST);
+int arctan(long V1, long V2);
 //----------------------------------------------------
 extern struct Channel xdata channels[CHANNEL_NUMBER];
 //----------------------------------------------------
