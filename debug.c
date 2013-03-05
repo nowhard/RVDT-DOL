@@ -89,7 +89,8 @@ PT_THREAD(OutProcess(struct pt *pt))
 	 last_angle=angle;
 	 angle=Get_Angle(PHASE_1_RESULT,PHASE_2_RESULT);
 	 //channels[0].channel_data+=Get_Delta_Angle(PHASE_1_RESULT,PHASE_2_RESULT,PHASE_1_RESULT_LAST,PHASE_2_RESULT_LAST);//Get_Angle(PHASE_1_RESULT,PHASE_2_RESULT);
-  	channels[0].channel_data+=(angle-last_angle);//Get_Angle(PHASE_1_RESULT,PHASE_2_RESULT);
+  	//channels[0].channel_data+=(angle-last_angle);//Get_Angle(PHASE_1_RESULT,PHASE_2_RESULT);
+	channels[0].channel_data=Get_Angle(PHASE_1_RESULT,PHASE_2_RESULT);
   }
   PT_END(pt);
  }

@@ -8,8 +8,10 @@ void Timer2_Initialize(void) //using 0// инициализация таймера 2-счетного таймер
 	TH2 = 0xFB;
 	//RCAP2L = 0x66;//0xAD;
     //RCAP2H = 0xEA;//0xFB; //10000Hz
-	RCAP2L = 0x8E;
-    RCAP2H = 0xFE; //15000Hz
+//	RCAP2L = 0x8E;
+ //   RCAP2H = 0xFE; //15000Hz
+ 	RCAP2L = 0xFF;
+    RCAP2H = 0xC9; //400Hz
 	TR2=1;
 	PT2=1;	// наивысший приоритет у 2 таймера
 	return;

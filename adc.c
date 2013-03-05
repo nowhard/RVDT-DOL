@@ -22,7 +22,7 @@ extern volatile unsigned char ANGLE_HANDLING_FLAG;//обработать угол
 //-------------------------------------------
 void ADC_Initialize() //using 0
 {	
-	ADCCON1=0xBC;//0xA0;	  // делитель 4(0x9),8(0xA), пропуск тактов 1, внутреннее опорное
+	ADCCON1=0xBC;//0xBC;//	  // делитель 4(0x9),8(0xA), пропуск тактов 1, внутреннее опорное
 	ADCCON2=0x00;	 // 0 канал, однократное преобразование
 	EADC=1;			 //разрешение прер-я от ADC
 	return;
@@ -57,40 +57,39 @@ void ADC_ISR(void) interrupt 6 //using 1
 	 {
 	 	adc_mid_counter=MID_NUM;
 
-//	   if(ANGLE_HANDLING_FLAG==0)
-//	   {
-//			PHASE_1_RESULT_LAST=PHASE_1_RESULT;
-//			PHASE_2_RESULT_LAST=PHASE_2_RESULT;
-//		}
-	//	ANGLE_HANDLING_FLAG=1;
+
 	    PHASE_1_RESULT=PHASE_1_VAL>>4;
 		PHASE_2_RESULT=PHASE_2_VAL>>4;	
 
-		if(((int)PHASE_2_RESULT-ADC_MID)>0)
+		if(PHASE_2_RESULT>=ADC_MID)
 		{
-			if(((int)PHASE_1_RESULT-ADC_MID)>=0)//1 сектор
+			if(PHASE_1_RESULT>=ADC_MID)//1 сектор
 			{
-				sector_1=1;
+				
 				if(sector_4==1)
 				{
 					channels[0].channel_data+=512;
 				}
-				sector_4=0;
+				PIN_1=sector_1=1;
+				PIN_2=sector_4=0;
 			}
 			else								//4 сектор
 			{
-				sector_4=1;
+				
 				if(sector_1==1)
 				{
 					channels[0].channel_data-=512;
 				}
-				sector_1=0;
+				PIN_2=sector_4=1;
+				PIN_1=sector_1=0;
 			}
 		}
 		else
 		{
+			//PIN_1=1;
 			sector_1=0;	
-			sector_4=0;	
+			sector_4=0;
+			//PIN_1=0;	
 		}
 		//channels[0].channel_data=PHASE_1_VAL>>6;
 		PHASE_1_VAL=PHASE_2_VAL=0;

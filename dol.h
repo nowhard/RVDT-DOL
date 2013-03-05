@@ -5,13 +5,13 @@
 #include "preferences.h"
 #include "watchdog.h"
 
-#define MIN1	839
-#define MAX1	3178
+#define MIN1	463
+#define MAX1	3540
 
-#define MIN2	805
-#define MAX2	3216
+#define MIN2	465
+#define MAX2	3547
 
-#define ADC_MID 2048
+#define ADC_MID 2006
 #define QUADRANT_WEIGHT	128
 
 #define SHR	3
